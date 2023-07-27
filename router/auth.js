@@ -9,14 +9,14 @@ router.post("/signup", async (req, res) => {
     dbPool.query(
         "CREATE TABLE IF NOT EXISTS \"USER\"(ID SERIAL PRIMARY KEY,USER_NAME VARCHAR NOT NULL,password VARCHAR NOT NULL)");
 
-    const { id, user_name, password } = req.body;
+    const { user_name, password } = req.body;
 
 
     let salt = await bcryptjs.genSalt(10);
     let hash = await bcryptjs.hash(password, salt);
     dbPool.query(
-        `INSERT INTO "USER" (ID, USER_NAME, password) VALUES ($1, $2, $3) RETURNING *`,
-        [id, user_name, hash],
+        `INSERT INTO "USER" (USER_NAME, password) VALUES ( $1, $2) RETURNING *`,
+        [user_name, hash],
         (err, response) => {
             if (err) {
                 console.log(err.stack);
@@ -24,7 +24,7 @@ router.post("/signup", async (req, res) => {
             } else {
                 console.log(response.rows[0]);
                 response.rows[0].password = null
-                return res.status(200).send(response.rows[0]);
+                return res.status(200).send({ message: "Signed up in successful", userInfo: response.rows[0] });
             }
         }
     );
@@ -53,6 +53,7 @@ router.post("/login", (req, res) => {
                     );
                     if (correctPass) {
                         existingUser.password = null;
+
                         return res
                             .status(200)
                             .send({ message: "Log in successful", userInfo: existingUser });

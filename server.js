@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const authRouter = require("./router/auth");
 const themeRouter = require("./router/theme")
+const dbPool = require("./dbConfig");
 
 const app = express();
 
@@ -32,6 +33,23 @@ app.use("/theme", themeRouter)
 // Socket.io connection handling
 io.on('connection', (socket) => {
     console.log('A user connected');
-});
 
+    socket.on("theme_check", (message) => {
+        console.log("theme check received")
+
+        let id = message.id
+
+        let query = 'SELECT * FROM \"THEME_PREFERENCE\" WHERE user_id = $1'
+        let values = [id]
+        dbPool.query(query, values, (error, result) => {
+            if (error) {
+                console.error('Error updating theme preference:', error);
+
+            } else {
+               
+                socket.emit('theme-updated', result.rows[0]);
+            }
+        })
+    })
+});
 

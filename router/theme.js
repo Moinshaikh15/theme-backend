@@ -10,11 +10,16 @@ router.post("/update-theme", async (req, res) => {
     const { userId, primaryColor, secondaryColor, textColor, fontSize, font } = req.body;
 
     const query = `
-    UPDATE \"THEME_PREFERENCE\"
-    SET primary_colour = $1, secondary_colour = $2,
-        text_colour = $3, font_size = $4, font = $5
-    WHERE user_id = $6
-  `;
+    INSERT INTO "THEME_PREFERENCE" (user_id, primary_colour, secondary_colour, text_colour, font_size, font)
+    VALUES ($6,$1, $2, $3, $4, $5)
+    ON CONFLICT (user_id)
+    DO UPDATE SET
+      primary_colour = EXCLUDED.primary_colour,
+      secondary_colour = EXCLUDED.secondary_colour,
+      text_colour = EXCLUDED.text_colour,
+      font_size = EXCLUDED.font_size,
+      font = EXCLUDED.font
+    RETURNING *;`;
 
     const values = [primaryColor, secondaryColor, textColor, fontSize, font, userId];
 
@@ -23,9 +28,9 @@ router.post("/update-theme", async (req, res) => {
             console.error('Error updating theme preference:', error);
             res.status(500).json({ error: 'Failed to update theme preference' });
         } else {
+
+            req.io.emit('theme-updated', result.rows[0]);
             res.status(200).json({ message: 'Theme preference updated successfully' });
-            req.io.emit('theme-updated', { userId, primaryColor, secondaryColor, textColor, fontSize, font });
-            
         }
     });
 })
