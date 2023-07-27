@@ -22,7 +22,6 @@ router.post("/signup", async (req, res) => {
                 console.log(err.stack);
                 return res.status(400).send(err.stack);
             } else {
-                console.log(response.rows[0]);
                 response.rows[0].password = null
                 return res.status(200).send({ message: "Signed up in successful", userInfo: response.rows[0] });
             }

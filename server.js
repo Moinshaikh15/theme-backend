@@ -35,8 +35,6 @@ io.on('connection', (socket) => {
     console.log('A user connected');
 
     socket.on("theme_check", (message) => {
-        console.log("theme check received")
-
         let id = message.id
 
         let query = 'SELECT * FROM \"THEME_PREFERENCE\" WHERE user_id = $1'
@@ -44,9 +42,7 @@ io.on('connection', (socket) => {
         dbPool.query(query, values, (error, result) => {
             if (error) {
                 console.error('Error updating theme preference:', error);
-
             } else {
-               
                 socket.emit('theme-updated', result.rows[0]);
             }
         })

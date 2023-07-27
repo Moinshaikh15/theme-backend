@@ -28,7 +28,6 @@ router.post("/update-theme", async (req, res) => {
             console.error('Error updating theme preference:', error);
             res.status(500).json({ error: 'Failed to update theme preference' });
         } else {
-
             req.io.emit('theme-updated', result.rows[0]);
             res.status(200).json({ message: 'Theme preference updated successfully' });
         }
