@@ -1,7 +1,5 @@
 const express = require('express');
-const http = require('http');
-const { Server, socketIo } = require('socket.io');
-const { Pool } = require('pg');
+const { Server } = require('socket.io');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const authRouter = require("./router/auth");
@@ -32,19 +30,38 @@ app.use("/theme", themeRouter)
 
 // Socket.io connection handling
 io.on('connection', (socket) => {
-    console.log('A user connected');
-
+    //console.log('A user connected');
     socket.on("theme_check", (message) => {
-        let id = message.id
+      
+        let userId = message.userId
+        socket.join(userId)
 
         let query = 'SELECT * FROM \"THEME_PREFERENCE\" WHERE user_id = $1'
-        let values = [id]
+        let values = [userId]
         dbPool.query(query, values, (error, result) => {
+           
             if (error) {
                 console.error('Error updating theme preference:', error);
             } else {
-                socket.emit('theme-updated', result.rows[0]);
+                if (result.rows.length > 0) {
+                    const themePreference = result.rows[0];
+                    
+                    socket.emit('theme-updated', themePreference);
+                } else {
+
+                    //send a default theme preference
+                    const defaultTheme = {
+                        primary_colour: '#ffffff',
+                        secondary_colour: '#000000',
+                        text_colour: '#000000',
+                        font_size: 16,
+                        font: 'Arial',
+                        user_id: userId,
+                    };
+                    socket.emit('theme-updated', defaultTheme);
+                }
             }
+
         })
     })
 });

@@ -4,6 +4,7 @@ const dbPool = require("../dbConfig");
 
 
 router.post("/update-theme", async (req, res) => {
+
     dbPool.query(
         "CREATE TABLE IF NOT EXISTS \"THEME_PREFERENCE\"(user_id SERIAL PRIMARY KEY,primary_colour VARCHAR, secondary_colour VARCHAR, text_colour VARCHAR, font_size VARCHAR, font VARCHAR)");
 
@@ -28,7 +29,8 @@ router.post("/update-theme", async (req, res) => {
             console.error('Error updating theme preference:', error);
             res.status(500).json({ error: 'Failed to update theme preference' });
         } else {
-            req.io.emit('theme-updated', result.rows[0]);
+            console.log("theme updated")
+            req.io.to(userId).emit('theme-updated', result.rows[0]);
             res.status(200).json({ message: 'Theme preference updated successfully' });
         }
     });
