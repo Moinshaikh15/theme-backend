@@ -32,30 +32,30 @@ app.use("/theme", themeRouter)
 io.on('connection', (socket) => {
     //console.log('A user connected');
     socket.on("theme_check", (message) => {
-      
+
         let userId = message.userId
         socket.join(userId)
 
         let query = 'SELECT * FROM \"THEME_PREFERENCE\" WHERE user_id = $1'
         let values = [userId]
         dbPool.query(query, values, (error, result) => {
-           
+
             if (error) {
                 console.error('Error updating theme preference:', error);
             } else {
                 if (result.rows.length > 0) {
                     const themePreference = result.rows[0];
-                    
+
                     socket.emit('theme-updated', themePreference);
                 } else {
 
                     //send a default theme preference
                     const defaultTheme = {
-                        primary_colour: '#ffffff',
-                        secondary_colour: '#000000',
-                        text_colour: '#000000',
+                        primary_colour: "#0098fe",
+                        secondary_colour: "#000000",
+                        text_colour: "#FFFFFF",
                         font_size: 16,
-                        font: 'Arial',
+                        font: "'Poppins', sans-serif",
                         user_id: userId,
                     };
                     socket.emit('theme-updated', defaultTheme);
